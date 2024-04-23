@@ -1,4 +1,5 @@
-#include <err.h>
+// #include <err.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include "rabin.h"
@@ -28,12 +29,26 @@ static int deg(uint64_t p) {
 
 // Mod calculates the remainder of x divided by p.
 static uint64_t mod(uint64_t x, uint64_t p) {
+    // printf("%lld mod %lld = %lld,", x, p, x % p);
+    int cnt = 0;
+    uint64_t xx = x;
+    uint64_t xxx;
     while (deg(x) >= deg(p)) {
         unsigned int shift = deg(x) - deg(p);
 
         x = x ^ (p << shift);
+        if(cnt == 0)
+        {
+            xxx = x;
+        }
+        cnt++;
     }
 
+    // printf("%lld\n", x);
+    if(cnt > 1)
+    {
+        // printf("mod cnt larger than 1: %llx, %llx, %llx, %d, %d, %d \n", xx, xxx, p, deg(xx), deg(xxx), deg(p));
+    }
     return x;
 }
 
@@ -42,6 +57,7 @@ static uint64_t append_byte(uint64_t hash, uint8_t b, uint64_t pol) {
     hash |= (uint64_t)b;
 
     return mod(hash, pol);
+    // return hash;
 }
 
 static void calc_tables(void) {
@@ -64,6 +80,7 @@ static void calc_tables(void) {
             hash = append_byte(hash, 0, POLYNOMIAL);
         }
         out_table[b] = hash;
+        printf("out.%d: %llx\n", b, hash);
     }
 
     // calculate table for reduction mod Polynomial
@@ -77,7 +94,15 @@ static void calc_tables(void) {
         // B is used to cancel out the 8 top bits so that one XOR operation is
         // enough to reduce modulo Polynomial
         mod_table[b] = mod(((uint64_t)b) << k, POLYNOMIAL) | ((uint64_t)b) << k;
+        printf("mod.%d: %llx\n", b, mod_table[b]);
+        printf("mod.%d: %llx, %llx\n", b, mod(((uint64_t)b) << k, POLYNOMIAL), ((uint64_t)b) << k);
     }
+}
+
+uint64_t mod_test(uint64_t x, uint64_t p) {
+    // return mod(x, p);
+    calc_tables();
+    return 0;
 }
 
 void rabin_append(struct rabin_t *h, uint8_t b) {
@@ -142,7 +167,9 @@ struct rabin_t *rabin_init(void) {
     struct rabin_t *h;
 
     if ((h = malloc(sizeof(struct rabin_t))) == NULL) {
-        errx(1, "malloc()");
+        // errx(1, "malloc()");
+        fprintf(stderr, "malloc()");
+        exit(1);
     }
 
     rabin_reset(h);

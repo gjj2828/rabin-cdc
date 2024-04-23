@@ -33,5 +33,6 @@ void rabin_slide(struct rabin_t *h, uint8_t b);
 void rabin_append(struct rabin_t *h, uint8_t b);
 int rabin_next_chunk(struct rabin_t *h, uint8_t *buf, unsigned int len);
 struct chunk_t *rabin_finalize(struct rabin_t *h);
+uint64_t mod_test(uint64_t x, uint64_t p);
 
 #endif
